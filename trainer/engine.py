@@ -41,7 +41,7 @@ class Engine():
 
         #-------------------- Define Optimizer --------------------#
         self.optimizer = optim.AdamW(self.net.parameters(), lr=self.opt.lr, weight_decay=0.1)
-        self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', factor=0.5,
+        self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', factor=0.1,
                                            patience=10, min_lr=self.opt.min_lr, verbose=True)
 
         #-------------------- Resume Previous Model --------------------#
@@ -130,8 +130,11 @@ class Engine():
             pbar.update()
             if self.log:
                 if epoch % self.opt.ri == 0 and idx % 10 == 0:
-                    gt = target[:,:,0,0].cpu().detach().numpy()
-                    pred = output[:,:,0,0].cpu().detach().numpy()
+                    gt = target[:,:,0:64:16,0:64:16].cpu().detach().numpy()
+                    pred = output[:,:,0:64:16,0:64:16].cpu().detach().numpy()
+                    # for i in range(16):
+                    #     plot_result(gt.shape[0], gt[:,:,i,i], pred[:,:,i,i], self.opt.prefix, 'val', epoch, idx, i)
+                        
                     plot_result(gt.shape[0], gt, pred, self.opt.prefix, 'val', epoch, idx)
         pbar.close()
         
@@ -166,9 +169,9 @@ class Engine():
             pbar.set_postfix({'Loss': loss.detach().cpu().item()})
             pbar.update()
             if self.log:
-                if idx % 10 == 0:
-                    gt = target[:,:,0,0].cpu().detach().numpy()
-                    pred = output[:,:,0,0].cpu().detach().numpy()
+                if idx % 1 == 0:
+                    gt = target[:,:,0:512:128,0:512:128].cpu().detach().numpy()
+                    pred = output[:,:,0:512:128,0:512:128].cpu().detach().numpy()
                     plot_result(gt.shape[0], gt, pred, self.opt.prefix, 'test', epoch, idx)
         pbar.close()
         

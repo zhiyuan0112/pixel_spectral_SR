@@ -21,6 +21,18 @@ def get_summary_writer(prefix):
     return writer
 
 
+def adjust_learning_rate(optimizer, lr):
+    """Sets the learning rate"""
+    print('Adjust Learning Rate => %.4e' % lr)
+    for i, param_group in enumerate(optimizer.param_groups):
+        if i == 0:
+            param_group['lr'] = lr
+        elif i == 1:
+            param_group['lr'] = lr * 0.1
+        else:
+            param_group['lr'] = lr
+
+
 def display_learning_rate(optimizer):
     lrs = []
     for i, param_group in enumerate(optimizer.param_groups):
@@ -38,9 +50,16 @@ def plot_result(n_fig, targets, outputs, prefix, stage, epoch, iter):
     x = np.arange(0, 100, 1)
     
     if n_fig == 1:
-        plt.plot(x, np.squeeze(targets), color='r', label='GT')
-        plt.plot(x, np.squeeze(outputs), color='b', label='Pred')
+        # fig, axs = plt.subplots(16, sharex=True)
+        cnt = 1
+        for i in range(4):
+            for j in range(4):
+                plt.subplot(4,4,cnt)
+                cnt += 1
+                plt.plot(x, np.squeeze(targets[:,:,i,j]), color='r', label='GT', linewidth=0.7)
+                plt.plot(x, np.squeeze(outputs[:,:,i,j]), color='b', label='Pred', linewidth=0.7)
         plt.legend()
+        
         # if stage == 'test':
         save_dir = 'logs/figs/' + prefix + '/' + stage + '/' + str(epoch)
         os.makedirs(save_dir, exist_ok=True)
@@ -52,8 +71,8 @@ def plot_result(n_fig, targets, outputs, prefix, stage, epoch, iter):
     else:
         fig, axs = plt.subplots(n_fig, sharex=True)
         for i, (target, output) in enumerate(zip(np.split(targets, n_fig), np.split(outputs, n_fig))):
-            axs[i].plot(x, np.squeeze(target), color='r', label='GT')
-            axs[i].plot(x, np.squeeze(output), color='b', label='Pred')
+            axs[i].plot(x, np.squeeze(target), color='r', label='GT', linewidth=0.7)
+            axs[i].plot(x, np.squeeze(output), color='b', label='Pred', linewidth=0.7)
         plt.legend()
         save_dir = 'logs/figs/' + prefix + '/' + stage
         os.makedirs(save_dir, exist_ok=True)

@@ -16,7 +16,7 @@ class CNN(nn.Module):
         self.n_feats = n_feats
         
         self.input = nn.Conv2d(in_channel, n_feats, kernel_size=1)
-        self.cnn_layer = self.make_layer(Conv_ReLU_Block, 1)
+        self.cnn_layer = self.make_layer(Conv_ReLU_Block, 4)
         self.output = nn.Conv2d(n_feats, out_channel, kernel_size=1)
     
     def make_layer(self, block, num_of_layer):
@@ -30,5 +30,10 @@ class CNN(nn.Module):
         x = self.cnn_layer(x)
         x = self.output(x)
         return x
-    
+   
+# data augmentation
+
+# CAVE: 20 Train, 10 Test
+# traditional - tao
+# conv2d (k=1)
     

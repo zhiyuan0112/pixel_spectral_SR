@@ -5,7 +5,7 @@ from scipy.io import loadmat, savemat
 import random
 
 
-def group_data(path, key, trans_key):
+def group_data(path, key):
     fns = os.listdir(path)
     data = []
     for fn in fns:
@@ -13,14 +13,10 @@ def group_data(path, key, trans_key):
         if key in temp.keys():
             print(fn, temp[key].shape)
             data.append(temp[key])
-        
-        intersection = list(set(trans_key) & set(temp.keys()))
-        if intersection:
-            print(intersection)
-            data.append(temp[intersection[0]].transpose(1,0))
+
     data = np.concatenate(data, axis=0)
     print(data.shape)
-    savemat('data/data.mat', {'gt': data})
+    savemat('data/data_T.mat', {'gt': data})
 
 
 def gen_data(path, key):
@@ -57,25 +53,15 @@ def gen_data(path, key):
 
 if __name__ == '__main__':
     # ========= Step 1. Groupping All Spectrum =========
-    path = 'spectrum'
+    path = 'data/T'
     key = 'T_R'
-    trans_key = ['spectrum_1',
-                 'spectrum_2',
-                 'spectrum_3',
-                 'spectrum_4',
-                 'spectrum_5',
-                 'spectrum_6',
-                 'spectrum_7',
-                 'spectrum_8',
-                 'spectrum_9',
-                 'spectrum_10',
-                 'spectrum_11',
-                 'T',]
-    # group_data(path, key, trans_key)
+    # group_data(path, key)
     
     # ========= Step 2. Generating Measurement Matrix and Train/Test Data =========
-    path = 'data/data.mat'
+    path = 'data/data_T.mat'
     key = 'gt'
     gen_data(path, key)
+    
+    test_fns = ['balloons_ms.mat']
     
     

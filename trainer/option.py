@@ -8,7 +8,7 @@ def basic_opt(description=''):
     
     # Training specifications
     parser.add_argument('--batchSize', '-b', type=int, default=16, help='Training batch size.')
-    parser.add_argument('--nEpochs', '-n', type=int, default=800, help='Training epoch.')
+    parser.add_argument('--nEpochs', '-n', type=int, default=2000, help='Training epoch.')
     parser.add_argument('--dir', '-d', type=str, default='/media/exthdd/datasets/hsi/lzy_data/CAVE_22_10/CAVE64_31_22.db', help='Training Data.')
     
     # Optimization specifications

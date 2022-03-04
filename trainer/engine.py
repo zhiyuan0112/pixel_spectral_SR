@@ -40,7 +40,7 @@ class Engine():
         self.criterion = nn.L1Loss()
 
         #-------------------- Define Optimizer --------------------#
-        self.optimizer = optim.AdamW(self.net.parameters(), lr=self.opt.lr, weight_decay=0.1)
+        self.optimizer = optim.AdamW(self.net.parameters(), lr=self.opt.lr)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', factor=0.1,
                                            patience=10, min_lr=self.opt.min_lr, verbose=True)
 
@@ -53,14 +53,15 @@ class Engine():
     def load_checkpoint(self, resumePath):
         model_best_path = join(self.basedir, 'model_best.pth')
         if os.path.exists(model_best_path):
+            print('============')
             best_model = torch.load(model_best_path)
-            self.best_psnr = best_model['psnr']
             self.best_loss = best_model['loss']
 
         print('==> Resuming from checkpoint %s..' % resumePath)
         assert os.path.isdir('logs/checkpoint'), 'Error: no checkpoint directory found!'
         checkpoint = torch.load(resumePath or model_best_path)
         self.epoch = checkpoint['epoch']
+        print(self.epoch)
         self.net.load_state_dict(checkpoint['net'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
@@ -90,8 +91,8 @@ class Engine():
             
             self.optimizer.zero_grad()
             output = self.net(input)
-            loss = self.criterion(output, target)
-            # loss = self.criterion(output, target) + self.criterion(output[:,1:,:,:]-output[:,:-1,:,:], target[:,1:,:,:]-target[:,:-1,:,:])
+            # loss = self.criterion(output, target)
+            loss = self.criterion(output, target) + 2 * self.criterion(output[:,1:,:,:]-output[:,:-1,:,:], target[:,1:,:,:]-target[:,:-1,:,:])
             loss.backward()
             self.optimizer.step()
             
@@ -170,8 +171,8 @@ class Engine():
             pbar.update()
             if self.log:
                 if idx % 1 == 0:
-                    gt = target[:,:,0:512:128,0:512:128].cpu().detach().numpy()
-                    pred = output[:,:,0:512:128,0:512:128].cpu().detach().numpy()
+                    gt = target[:,:,0:500:125,0:500:125].cpu().detach().numpy()
+                    pred = output[:,:,0:500:125,0:500:125].cpu().detach().numpy()
                     plot_result(gt.shape[0], gt, pred, self.opt.prefix, 'test', epoch, idx)
         pbar.close()
         

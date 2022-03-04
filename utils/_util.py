@@ -133,6 +133,7 @@ class LoadMatKey(object):
     def __call__(self, mat):
         # item = mat[self.key].transpose((2,0,1))
         item = mat[self.key]
+        item = item[10:512, 10:512, :]  # Remove the left pixels with peak
         item = item.astype(np.float32)
         return item
 

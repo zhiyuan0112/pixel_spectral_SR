@@ -19,7 +19,7 @@ def create_lmdb_train(
         datadir, fns, name, matkey,
         crop_sizes, scales, ksizes, strides,
         load=h5py.File, augment=True,
-        seed=2021):
+        seed=2022):
     """
     Create Augmented Dataset
     """
@@ -32,7 +32,18 @@ def create_lmdb_train(
             if data.shape[-1] > crop_sizes[0] and data.shape[-2] > crop_sizes[0]:
                 data = crop_center(data, crop_sizes[0], crop_sizes[1])
         for i in range(len(scales)):
-            temp = zoom(data, zoom=(scales[i][0], scales[i][1], scales[i][1]), mode='nearest') if scales[i] != 1 else data
+            temp = zoom(data, zoom=(1, scales[i], scales[i])) if scales[i] != 1 else data
+            
+            temp_ssr = np.zeros((100, temp.shape[1], temp.shape[2]))
+            x = np.arange(0, 31, 1)
+            spectrum = np.linspace(0, 30, 100)
+            wid = temp.shape[1]
+            hei = temp.shape[2]
+            for m in range(wid):
+                for n in range(hei):
+                    temp_ssr[:,m,n] = np.interp(spectrum, x, np.squeeze(temp[:,m,n]))
+            
+            temp = temp_ssr
             print(temp.shape)
             temp = Data2Volume(temp, ksizes=ksizes, strides=list(strides[i]))
             
@@ -107,7 +118,7 @@ def create_cave64_31():
     create_lmdb_train(
         datadir, fns, '/media/exthdd/datasets/hsi/lzy_data/CAVE_22_10/CAVE64_31_22', 'gt',
         crop_sizes=None,
-        scales=([100/31,1], [100/31, 0.75], [100/31, 0.5]),
+        scales=(1, 0.75, 0.5),
         ksizes=(100, 64, 64),
         strides=[(100, 64, 64), (100, 32, 32), (100, 32, 32)],
         load=loadmat, augment=True,

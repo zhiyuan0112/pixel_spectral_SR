@@ -51,13 +51,11 @@ def plot_result(n_fig, targets, outputs, prefix, stage, epoch, iter):
     
     if n_fig == 1:
         # fig, axs = plt.subplots(16, sharex=True)
-        cnt = 1
-        for i in range(4):
-            for j in range(4):
-                plt.subplot(4,4,cnt)
-                cnt += 1
-                plt.plot(x, np.squeeze(targets[:,:,i,j]), color='r', label='GT', linewidth=0.7)
-                plt.plot(x, np.squeeze(outputs[:,:,i,j]), color='b', label='Pred', linewidth=0.7)
+        for i in range(16):
+            # for j in range(4):
+            plt.subplot(4,4,i+1)
+            plt.plot(x, np.squeeze(targets[:,:,i,i]), color='r', label='GT', linewidth=0.7)
+            plt.plot(x, np.squeeze(outputs[:,:,i,i]), color='b', label='Pred', linewidth=0.7)
         plt.legend()
         
         # if stage == 'test':

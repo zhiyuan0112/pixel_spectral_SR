@@ -53,7 +53,6 @@ class Engine():
     def load_checkpoint(self, resumePath):
         model_best_path = join(self.basedir, 'model_best.pth')
         if os.path.exists(model_best_path):
-            print('============')
             best_model = torch.load(model_best_path)
             self.best_loss = best_model['loss']
 
@@ -61,26 +60,26 @@ class Engine():
         assert os.path.isdir('logs/checkpoint'), 'Error: no checkpoint directory found!'
         checkpoint = torch.load(resumePath or model_best_path)
         self.epoch = checkpoint['epoch']
-        print(self.epoch)
         self.net.load_state_dict(checkpoint['net'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
-    def save_checkpoint(self, net, optimizer, loss, epoch, model_out_path=None):
+    def save_checkpoint(self, net, optimizer, loss, model_out_path=None):
         if not os.path.isdir(join(self.basedir)):
             os.makedirs(join(self.basedir))
         if not model_out_path:
-            model_out_path = join(self.basedir, "model_epoch_%d.pth" % (epoch))
+            model_out_path = join(self.basedir, "model_epoch_%d.pth" % (self.epoch))
         state = {
             'net': net.state_dict(),
             'optimizer': optimizer.state_dict(),
             'loss': loss,
-            'epoch': epoch,
+            'epoch': self.epoch,
         }
 
         torch.save(state, model_out_path)
         print("Checkpoint saved to {}".format(model_out_path))
         
-    def train(self, data_loader, epoch):
+    def train(self, data_loader):
+        print('\n Epoch:', self.epoch)
         self.net.train()
         pbar = progress_bar(len(data_loader))
         avg_loss = 0
@@ -91,26 +90,30 @@ class Engine():
             
             self.optimizer.zero_grad()
             output = self.net(input)
-            # loss = self.criterion(output, target)
-            loss = self.criterion(output, target) + 2 * self.criterion(output[:,1:,:,:]-output[:,:-1,:,:], target[:,1:,:,:]-target[:,:-1,:,:])
+            loss = self.criterion(output, target)
+            # loss = self.criterion(output, target) + 2 * self.criterion(output[:,1:,:,:]-output[:,:-1,:,:], target[:,1:,:,:]-target[:,:-1,:,:])
             loss.backward()
             self.optimizer.step()
             
             avg_loss += loss.detach().cpu().item()
             avg_loss /= (idx+1)
             
+            self.iteration += 1
+            
             pbar.set_postfix({'Loss': avg_loss})
             pbar.update()
         pbar.close()
         
+        self.epoch += 1
+        
         if self.log:
-            self.writer.add_scalar(join(self.opt.prefix, 'train_loss_epoch'), avg_loss, epoch)    
-            if epoch % self.opt.ri == 0:
+            self.writer.add_scalar(join(self.opt.prefix, 'train_loss_epoch'), avg_loss, self.epoch)    
+            if self.epoch % self.opt.ri == 0:
                 target = target[:,:,0,0].cpu().detach().numpy()
                 output = output[:,:,0,0].cpu().detach().numpy()
-                plot_result(target.shape[0], target, output, self.opt.prefix, 'train', epoch, None)
+                plot_result(target.shape[0], target, output, self.opt.prefix, 'train', self.epoch, None)
 
-    def validate(self, data_loader, epoch):
+    def validate(self, data_loader):
         self.net.eval()
         pbar = progress_bar(len(data_loader))
         avg_loss = 0
@@ -130,28 +133,28 @@ class Engine():
             pbar.set_postfix({'Loss': loss.detach().cpu().item()})
             pbar.update()
             if self.log:
-                if epoch % self.opt.ri == 0 and idx % 10 == 0:
-                    gt = target[:,:,0:64:16,0:64:16].cpu().detach().numpy()
-                    pred = output[:,:,0:64:16,0:64:16].cpu().detach().numpy()
+                if self.epoch % self.opt.ri == 0 and idx % 10 == 0:
+                    gt = target[:,:,0:64:4,0:64:4].cpu().detach().numpy()
+                    pred = output[:,:,0:64:4,0:64:4].cpu().detach().numpy()
                     # for i in range(16):
                     #     plot_result(gt.shape[0], gt[:,:,i,i], pred[:,:,i,i], self.opt.prefix, 'val', epoch, idx, i)
                         
-                    plot_result(gt.shape[0], gt, pred, self.opt.prefix, 'val', epoch, idx)
+                    plot_result(gt.shape[0], gt, pred, self.opt.prefix, 'val', self.epoch, idx)
         pbar.close()
         
         
         if avg_loss < self.best_loss:
             print('Best Result Saving...')
             model_best_path = join(self.basedir, 'model_best.pth')
-            self.save_checkpoint(self.net, self.optimizer, avg_loss, epoch, model_out_path=model_best_path)
+            self.save_checkpoint(self.net, self.optimizer, avg_loss, model_out_path=model_best_path)
             self.best_loss = avg_loss
         
         if self.log:
-            self.writer.add_scalar(join(self.opt.prefix, 'val_loss_epoch'), avg_loss, epoch)
+            self.writer.add_scalar(join(self.opt.prefix, 'val_loss_epoch'), avg_loss, self.epoch)
             
         return loss
 
-    def test(self, data_loader, epoch):
+    def test(self, data_loader):
         self.net.eval()
         pbar = progress_bar(len(data_loader))
         avg_loss = 0
@@ -171,11 +174,11 @@ class Engine():
             pbar.update()
             if self.log:
                 if idx % 1 == 0:
-                    gt = target[:,:,0:500:125,0:500:125].cpu().detach().numpy()
-                    pred = output[:,:,0:500:125,0:500:125].cpu().detach().numpy()
-                    plot_result(gt.shape[0], gt, pred, self.opt.prefix, 'test', epoch, idx)
+                    gt = target[:,:,0:500:25,0:500:25].cpu().detach().numpy()
+                    pred = output[:,:,0:500:25,0:500:25].cpu().detach().numpy()
+                    plot_result(gt.shape[0], gt, pred, self.opt.prefix, 'test', self.epoch, idx)
         pbar.close()
         
         if self.log:
-            self.writer.add_scalar(join(self.opt.prefix, 'test_loss_epoch'), avg_loss, epoch)
+            self.writer.add_scalar(join(self.opt.prefix, 'test_loss_epoch'), avg_loss, self.epoch)
             

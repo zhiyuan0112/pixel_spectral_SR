@@ -75,15 +75,14 @@ test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False,
 def main():
     adjust_learning_rate(engine.optimizer, opt.lr) 
     for i in range(opt.nEpochs):
-        print('\n Epoch:', i)
-        engine.train(train_loader, i)
-        loss = engine.validate(val_loader, i)
+        engine.train(train_loader)
+        loss = engine.validate(val_loader)
 
         engine.scheduler.step(loss)
         display_learning_rate(engine.optimizer)
         if i % opt.ri == 0:
-            engine.save_checkpoint(engine.net, engine.optimizer, loss, i)
-            engine.test(test_loader, i)
+            engine.save_checkpoint(engine.net, engine.optimizer, loss)
+            engine.test(test_loader)
 
 
 if __name__ == '__main__':

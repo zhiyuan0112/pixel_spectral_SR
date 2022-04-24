@@ -47,7 +47,7 @@ def progress_bar(total):
 
 
 def plot_result(n_fig, targets, outputs, prefix, stage, epoch, iter):
-    x = np.arange(0, 100, 1)
+    x = np.arange(0, 500, 1)
     
     if n_fig == 1:
         # fig, axs = plt.subplots(16, sharex=True)

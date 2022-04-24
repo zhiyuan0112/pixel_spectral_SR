@@ -54,7 +54,7 @@ val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False,
 # ---------------- Test Data ---------------- #
 test_dir = '/media/exthdd/datasets/hsi/lzy_data/CAVE_22_10/test'
 test_data = MatDataFromFolder(test_dir, size=None)  # (340,340,103) 
-test_data = TransformDataset(test_data, LoadMatKey(key='gt_100'))
+test_data = TransformDataset(test_data, LoadMatKey(key='gt_500'))
 
 print("Length of test set: {}.".format(len(test_data)))
 

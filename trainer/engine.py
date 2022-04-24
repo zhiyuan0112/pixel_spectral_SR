@@ -33,7 +33,7 @@ class Engine():
         
         #-------------------- Define Model --------------------#
         print("==> Creating model")
-        self.net = CNN(in_channel=16, out_channel=100)
+        self.net = CNN(in_channel=16, out_channel=500)
         self.net.to(self.device)
         
         #-------------------- Define Loss Function --------------------#

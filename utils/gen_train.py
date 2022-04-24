@@ -34,9 +34,9 @@ def create_lmdb_train(
         for i in range(len(scales)):
             temp = zoom(data, zoom=(1, scales[i], scales[i])) if scales[i] != 1 else data
             
-            temp_ssr = np.zeros((100, temp.shape[1], temp.shape[2]))
+            temp_ssr = np.zeros((500, temp.shape[1], temp.shape[2]))
             x = np.arange(0, 31, 1)
-            spectrum = np.linspace(0, 30, 100)
+            spectrum = np.linspace(0, 30, 500)
             wid = temp.shape[1]
             hei = temp.shape[2]
             for m in range(wid):
@@ -116,11 +116,11 @@ def create_cave64_31():
     fns = [fn.split('.')[0]+'.mat' for fn in fns]
 
     create_lmdb_train(
-        datadir, fns, '/media/exthdd/datasets/hsi/lzy_data/CAVE_22_10/CAVE64_31_22', 'gt',
+        datadir, fns, '/media/exthdd/datasets/hsi/lzy_data/CAVE_22_10/CAVE64_31to500_22', 'gt',
         crop_sizes=None,
         scales=(1, 0.75, 0.5),
-        ksizes=(100, 64, 64),
-        strides=[(100, 64, 64), (100, 32, 32), (100, 32, 32)],
+        ksizes=(500, 64, 64),
+        strides=[(500, 64, 64), (500, 32, 32), (500, 32, 32)],
         load=loadmat, augment=True,
     )
 

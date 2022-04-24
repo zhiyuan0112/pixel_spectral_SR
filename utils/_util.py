@@ -34,7 +34,7 @@ class HSI2Tensor(object):
 
 class Degrade(object):
     def __init__(self):
-        self.A = loadmat('/home/liangzhiyuan/Code/spectralSR/data/A.mat')['A']
+        self.A = loadmat('/home/liangzhiyuan/Code/spectralSR/data/A.mat')['A_500']
 
     def __call__(self, img):
         img = np.einsum('ij,klj->kli', self.A, img)

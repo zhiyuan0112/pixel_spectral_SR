@@ -52,6 +52,7 @@ val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False,
 
 
 # ---------------- Test Data ---------------- #
+'''
 test_dir = '/media/exthdd/datasets/hsi/lzy_data/CAVE_22_10/test'
 test_data = MatDataFromFolder(test_dir, size=None)  # (340,340,103) 
 test_data = TransformDataset(test_data, LoadMatKey(key='gt_500'))
@@ -70,7 +71,7 @@ test_dataset = ImageTransformDataset(test_data, sr_degrade_test)
 
 test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False,
                           num_workers=opt.threads, pin_memory=True)
-
+'''
 
 def main():
     adjust_learning_rate(engine.optimizer, opt.lr) 
@@ -82,7 +83,7 @@ def main():
         display_learning_rate(engine.optimizer)
         if i % opt.ri == 0:
             engine.save_checkpoint(engine.net, engine.optimizer, loss)
-            engine.test(test_loader)
+            # engine.test(test_loader)
 
 
 if __name__ == '__main__':
